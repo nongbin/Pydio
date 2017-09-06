@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ajxp_plugin label="CONF_MESSAGE[Bootstrap Loader]" description="CONF_MESSAGE[Core plugin for loading the framework. Do NOT disable this plugin!]" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd" mixins="dibidriver_provider" id="boot.conf">
+    <class_definition classname="Pydio\Conf\Boot\BootConfLoader" filename="plugins/boot.conf/BootConfLoader.php" />
+    <client_settings>
+        <resources>
+            <css file="plugins/boot.conf/res/css/installer.css" autoload="true"/>
+            <i18n namespace="installer" path="plugins/boot.conf/res/i18n"/>
+            <js className="PydioInstaller" file="plugins/boot.conf/res/build/PydioInstaller.js" depends="PydioForm"/>
+        </resources>
+    </client_settings>
+    <server_settings>
+        <global_param group="CONF_MESSAGE[Application Settings]" name="sysLegend" type="legend" label="" description="CONF_MESSAGE[Set up application title and create a connexion identifier for the super-administrator user. Make sure to use a strong password, as this user will have full access to the server.]"/>
+        <global_param group="CONF_MESSAGE[Application Settings]" name="APPLICATION_TITLE" type="string" label="CONF_MESSAGE[Application Title]" description="CONF_MESSAGE[Your system title]" default="Pydio" mandatory="true"/>
+        <global_param group="CONF_MESSAGE[Application Settings]" name="APPLICATION_WELCOME" type="string" label="CONF_MESSAGE[Welcome Message]" description="CONF_MESSAGE[An additional message displayed at startup, on the splash screen and the login screen.]" default="CONF_MESSAGE[Welcome to Pydio]" mandatory="false"/>
+        <global_param group="CONF_MESSAGE[Authentification]" name="ADMIN_USER_LOGIN" type="string" label="CONF_MESSAGE[Admin Login]" description="CONF_MESSAGE[Alphanumeric login]" mandatory="true"/>
+        <global_param group="CONF_MESSAGE[Authentification]" name="ADMIN_USER_NAME" type="string" label="CONF_MESSAGE[Admin Display Name]" description="CONF_MESSAGE[User-friendly name of the user]" mandatory="true"/>
+        <global_param group="CONF_MESSAGE[Authentification]" name="ADMIN_USER_PASS" type="valid-password" label="CONF_MESSAGE[Admin Password]" description="CONF_MESSAGE[Use a strong password (more than 8 characters, complicated ones.]" mandatory="true"/>
+        <global_param group="CONF_MESSAGE[Database Connection]" name="StorageLegend" type="legend" label="" description="CONF_MESSAGE[How the application configuration data will be stored (users, plugins, etc. not how your actual documents are managed). To get started rapidly, select No Database. To enable more advanced features, configure a database connection.]"/>
+        <!--
+        <global_param group="CONF_MESSAGE[Database Connection]" type="button" name="TEST_SQL" choices="boot_test_sql_connexion" label="CONF_MESSAGE[Test SQL Connection]" description="CONF_MESSAGE[Test Connexion]" mandatory="false"/>
+        -->
+        <global_param group="CONF_MESSAGE[Database Connection]" name="db_type" default="mysql" label="CONF_MESSAGE[Database]" description="CONF_MESSAGE[Database type (Sqlite3 is NOT recommended for production purpose.)]" type="group_switch:dibi_provider" mandatory="true" choices="mysql|MySQL,sqlite3|Sqlite 3,postgre|PostgreSQL"/>
+        <global_param group="CONF_MESSAGE[Advanced Options]" name="AdvancedLegend" type="legend" label="" description="CONF_MESSAGE[Please review these technical parameters. Encoding and URI should be auto-detected, but please make sure they reflect your actual server configuration.]"/>
+        <global_param group="CONF_MESSAGE[Advanced Options]" name="ENCODING" type="string" label="CONF_MESSAGE[Detected Encoding]" description="CONF_MESSAGE[Please make sure to set the encoding corresponding to your server configuration, something like ln_LN.CHARSET, e.g en_US.UTF-8]" default="" mandatory="true"/>
+        <global_param group="CONF_MESSAGE[Advanced Options]" name="SERVER_URL" type="string" label="CONF_MESSAGE[Detected Server URL]" description="CONF_MESSAGE[Make sure this is correct, as it's used to rewrite the htaccess file]" default="" mandatory="true"/>
+        <global_param group="CONF_MESSAGE[Advanced Options]" name="APC_CACHE_ENABLE" type="boolean" label="CONF_MESSAGE[Enable cache (recommended)]" description="CONF_MESSAGE[Use key/value store to cache server data in-memory. If APC/APCu is detected, it will be enabled by default, you can change this setting later to use a dedicated server like Redis or Memcache.]" default="false" mandatory="true"/>
+        <global_param group="CONF_MESSAGE[Advanced Options]" name="MAILER_ENABLE" type="group_switch:mailer" label="CONF_MESSAGE[Enable emails]" description="CONF_MESSAGE[Set up system to send emails]" default="no" mandatory="true"/>
+        <global_param group_switch_name="mailer" group_switch_value="no" group_switch_label="CONF_MESSAGE[No (you can enable mails later)]" name="status" type="hidden" label="No" description="s" default="no"/>
+        <global_param group_switch_name="mailer" group_switch_value="yes" group_switch_label="CONF_MESSAGE[Yes (requires a correct PHP configuration)]" name="status" type="hidden" label="Yes" description="s" default="yes"/>
+        <global_param group_switch_name="mailer" group_switch_value="yes" group_switch_label="Yes" name="MAILER_SYSTEM" type="select" label="CONF_MESSAGE[Php Mailer]" description="CONF_MESSAGE[Set up the correct value to send emails]" choices="mail|Mail,sendmail|Sendmail" default="mail" mandatory="true"/>
+        <global_param group_switch_name="mailer" group_switch_value="yes" group_switch_label="Yes" name="MAILER_ADMIN" type="string" label="CONF_MESSAGE[Administrator Email]" description="CONF_MESSAGE[Default 'From' email used to send emails.]" mandatory="true"/>
+        <global_param group_switch_name="mailer" group_switch_label="yes" group_switch_value="yes" type="button" name="TEST_MAILER" choices="boot_test_mailer" label="CONF_MESSAGE[Test Mailer]" description="CONF_MESSAGE[Try sending an email with the configured data]" mandatory="false"/>
+        <global_param group="CONF_MESSAGE[Advanced Options]" name="APPLICATION_LANGUAGE" type="select" choices="AJXP_AVAILABLE_LANGUAGES" label="CONF_MESSAGE[Default Language]" description="CONF_MESSAGE[Select a language activated by default( users will still be able to switch)]" default="en" mandatory="true"/>
+    </server_settings>
+    <registry_contributions>
+        <actions>
+            <action name="load_installer_form">
+                <processing><serverCallback methodName="loadInstallerForm"/></processing>
+            </action>
+            <action name="boot_test_sql_connexion">
+                <processing><serverCallback methodName="testConnexions"/></processing>
+            </action>
+            <action name="boot_test_mailer">
+                <processing><serverCallback methodName="testConnexions"/></processing>
+            </action>
+            <action name="apply_installer_form">
+                <processing><serverCallback methodName="applyInstallerForm"/></processing>
+            </action>
+            <action name="ajxp_installer">
+                <gui iconClass="icon-magic" src="" text="installer.1" title="installer.1">
+                    <context dir="" recycle="false" selection="false" actionBar="true" actionBarGroup="user"/>
+                </gui>
+                <rightsContext adminOnly="false" noUser="false" read="false" userLogged="false" write="false"/>
+                <processing>
+                    <clientCallback module="PydioInstaller.openDialog"/>
+                    <clientListener name="init"><![CDATA[
+                        ResourcesManager.loadClassesAndApply(['PydioForm', 'PydioInstaller'], function(){
+                            pydio.getController().fireAction("ajxp_installer");
+                        });
+                    ]]></clientListener>
+                </processing>
+            </action>
+        </actions>
+    </registry_contributions>
+</ajxp_plugin>

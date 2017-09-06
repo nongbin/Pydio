@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ajxp_plugin  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd"
+              name="compression" enabled="true" label="CONF_MESSAGE[Tar Archives Support]"
+              description="CONF_MESSAGE[Create and extract tar, tar.gz and tar.bz2 archives.]" >
+
+    <client_settings>
+        <resources>
+            <i18n namespace="compression" path="plugins/action.compression/res/i18n"/>
+            <js className="CompressionActions" file="plugins/action.compression/res/build/CompressionActions.js"/>
+        </resources>
+    </client_settings>
+
+	<registry_contributions>
+        <extensions>
+            <extension mime="tar" font="archive" icon="archive.png" messageId="61"/>
+            <extension mime="bz2" font="archive" icon="archive.png" messageId="61"/>
+        </extensions>
+        <actions>
+            <action name="compression">
+                <processing>
+                    <serverCallback methodName="receiveAction"/>
+                </processing>
+            </action>
+            <action name="compress_ui">
+                <processing>
+                    <clientCallback module="CompressionActions.Callbacks.compressUI"/>
+                </processing>
+            </action>
+            <action name="extraction">
+                <gui text="compression.9" title="compression.10" src="archive_insert.png" iconClass="icon-briefcase" accessKey="" hasAccessKey="false">
+                    <context selection="true" dir="true" recycle="hidden"
+                             actionBar="true" contextMenu="true" infoPanel="false"
+                             actionBarGroup="change" inZip="false">
+                    </context>
+                    <selectionContext dir="false" file="true" recycle="false" unique="true" allowedMimes="tar,gz,bz2"/>
+                </gui>
+                <processing>
+                    <clientCallback module="CompressionActions.Callbacks.extract"/>
+                    <serverCallback methodName="receiveAction" pluginId="action.compression" />
+                </processing>
+            </action>
+        </actions>
+	</registry_contributions>
+	<class_definition filename="plugins/action.compression/PluginCompression.php" classname="Pydio\Action\Compression\PluginCompression"/>
+    <dependencies>
+        <activePlugin pluginName="access.fs"/>
+    </dependencies>
+</ajxp_plugin>

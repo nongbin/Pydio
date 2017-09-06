@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ajxp_plugin enabled="false" label="CONF_MESSAGE[Power FS]" description="CONF_MESSAGE[This set of extensions assume that you have an administration access to your server: ability to tweak the webserver and the php configuration, ability to access the command line, etc.]" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd">
+    <class_definition classname="Pydio\Action\Compression\PowerFSController" filename="plugins/action.powerfs/PowerFSController.php"/>
+    <client_settings>
+        <resources>
+            <i18n namespace="powerfs" path="plugins/action.powerfs/i18n"/>
+            <js className="PowerFSActions" file="plugins/action.powerfs/res/build/PowerFSActions.js"/>
+        </resources>
+    </client_settings>
+    <server_settings>
+        <global_param name="ZIP_PATH" type="string" label="CONF_MESSAGE[Zip path]"
+                      description="CONF_MESSAGE[Path of the zip utilitary on the command line]" default="zip"/>
+    </server_settings>
+    <registry_contributions>
+        <actions>
+            <!-- Override access.fs compression -->
+            <action name="compress">
+                <processing>
+                    <serverCallback methodName="switchAction" restParams="/file+" checkParams="false" sdkMethodName="compress"/>
+                </processing>
+            </action>
+            <action name="precompress">
+                <rightsContext noUser="true" userLogged="only" read="true" write="false" adminOnly=""/>
+                <processing>
+                    <serverCallback methodName="switchAction"/>
+                </processing>
+            </action>
+            <action name="postcompress_download">
+                <rightsContext noUser="true" userLogged="only" read="true" write="false" adminOnly=""/>
+                <processing>
+                    <serverCallback methodName="switchAction"/>
+                </processing>
+            </action>
+            <!-- Override download client callback -->
+            <action name="download">
+                <processing>
+                    <clientCallback module="PowerFSActions.Callbacks.download"/>
+                </processing>
+            </action>
+        </actions>
+    </registry_contributions>
+    <dependencies>
+       <activePlugin pluginName="access.fs"/>
+    </dependencies>
+</ajxp_plugin>

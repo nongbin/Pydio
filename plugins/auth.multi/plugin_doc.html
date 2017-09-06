@@ -1,0 +1,12 @@
+<p>
+    Encapsulate the usage of other auth.* drivers, to allow multiple sources of users. It can work either in Master/Slave mode (master is read-only, slave is read-write for shared users),
+    or in "User-choice" mode where users can choose at login time wich method to use for authentication.
+</p>
+<p>
+    <b>Master/Slave Mode</b>: this is useful to connect Pydio to an external user directory that is not writeable. Typical example would be an LDAP / AD directory.
+    To still be able to share resources with external users, setting a "local" sql-based driver as Slave will allow pydio to create shared users in the local DB.
+</p>
+<p>
+    <b>Users'choice</b>: configure two authentication drivers and let your user choose which method to use at login time. This can for example let user declare themselves
+    as internal or external.
+</p>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ajxp_plugin  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd" name="skeleton" enabled="false" label="CONF_MESSAGE[Skeleton Plugin]" description="CONF_MESSAGE[This is an empty container to demonstrate the basics of plugins coding.]" >
+    <server_settings>
+        <global_param name="SHOW_CUSTOM_FOOTER" type="boolean" label="CONF_MESSAGE[Custom Footer]" description="CONF_MESSAGE[Show a custom footer div]" mandatory="false" default="false"/>
+        <global_param name="CUSTOM_FOOTER_CONTENT" type="textarea" label="CONF_MESSAGE[Footer Content]" description="CONF_MESSAGE[Display this content in the footer]" mandatory="false" default="Your custom footer content"/>
+        <global_param expose="true" name="CUSTOM_BUTTON_TARGET" type="string" label="CONF_MESSAGE[Button Target Url]" description="CONF_MESSAGE[The target URL of the button that will be added to the application]" mandatory="true" default="https://pydio.com"/>
+    </server_settings>
+
+    <client_settings>
+        <resources>
+            <i18n namespace="skeleton" path="plugins/action.skeleton/res/i18n"/>
+            <js className="SkeletonActions" file="plugins/action.skeleton/res/build/SkeletonActions.js"/>
+            <img_library alias="skeleton_images" path="plugins/action.skeleton/res/images"/>
+        </resources>
+    </client_settings>
+
+	<registry_contributions>
+		<client_configs uuidAttr="name">
+            <template name="skeleton_bottom" element="ajxp_desktop" position="bottom" theme="material" namespace="SkeletonActions" component="Template"/>
+		</client_configs>
+        <actions>
+            <action name="my_skeleton_button">
+                <gui text="skeleton.1" title="skeleton.2" hasAccessKey="false">
+                    <context selection="false" dir="" recycle="hidden" actionBar="true" actionBarGroup="change_main"/>
+                </gui>
+                <processing>
+                    <clientCallback module="SkeletonActions.Callbacks.alertButton"/>
+                </processing>
+            </action>
+            <action name="my_skeleton_button_frame">
+                <gui text="skeleton.4" title="skeleton.5" hasAccessKey="false">
+                    <context selection="false" dir="" recycle="hidden" actionBar="true" actionBarGroup="change_main"/>
+                </gui>
+                <processing>
+                    <clientCallback module="SkeletonActions.Callbacks.frameButton"/>
+                    <serverCallback methodName="receiveAction" pluginId="action.skeleton"/>
+                </processing>
+            </action>
+        </actions>
+	</registry_contributions>
+	<class_definition filename="plugins/action.skeleton/PluginSkeleton.php" classname="Pydio\Action\Skeleton\PluginSkeleton"/>
+</ajxp_plugin>

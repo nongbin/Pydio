@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<registry_contributions  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd">
+	<actions>
+        <action name="logout" expireDefault="true">
+			<gui text="304" title="305" iconClass="icon-home" accessKey="" hasAccessKey="false" forbidOverride="true">
+				<context selection="false" dir="" recycle="false"
+					actionBar="false" contextMenu="false" infoPanel="false" actionBarGroup="zlogin,minisite">
+				</context>
+			</gui>
+			<rightsContext noUser="false" userLogged="only" guestLogged="show" read="false" write="false" adminOnly="" forbidOverride="true"/>
+			<processing forbidOverride="true">
+				<clientCallback><![CDATA[
+					PydioApi.clearRememberData();
+					PydioApi.getClient().request({get_action:'back'}, function(transport){
+						var child = transport.responseXML.documentElement.childNodes;
+                        document.location.href = child[0].nodeValue;
+					});
+					]]></clientCallback>
+				<serverCallback methodName="switchAction"/>
+			</processing>
+		</action>
+	</actions>
+</registry_contributions>

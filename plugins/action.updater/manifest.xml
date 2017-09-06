@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ajxp_plugin name="updater" label="CONF_MESSAGE[Update Engine]" description="CONF_MESSAGE[Automatic update of Pydio. Since version 3.3.3]" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd">
+    <server_settings>
+        <global_param name="UPDATE_SITE" group="CONF_MESSAGE[Updater Configuration]" type="string" label="CONF_MESSAGE[Update Site]" description="CONF_MESSAGE[Where to update]" default="https://update.pydio.com/pub/"/>
+        <global_param name="UPDATE_CHANNEL" group="CONF_MESSAGE[Updater Configuration]" type="select" choices="stable|CONF_MESSAGE[Stable],migrate|CONF_MESSAGE[Install Enterprise Distribution],dev|CONF_MESSAGE[Development],test|CONF_MESSAGE[Testing (blank)]" label="CONF_MESSAGE[Update Channel]" description="CONF_MESSAGE[Check stable or dev channel]" default="stable" mandatory="true"/>
+        <global_param name="PRESERVE_FILES" group="CONF_MESSAGE[Updater Configuration]" type="textarea" label="CONF_MESSAGE[Preserve Files]" description="CONF_MESSAGE[Files declared here (enter pathes from the root of Ajxp installation, comma-separated) will be backed up and restored before and after upgrade.]" default=""/>
+        <global_param name="UPDATE_SITE_USER" group="CONF_MESSAGE[Authenticated Update Site]" type="string" label="CONF_MESSAGE[Update Site User]" description="CONF_MESSAGE[Required if the update site is requiring credentials.]" default="" mandatory="false"/>
+        <global_param name="UPDATE_SITE_PASS" group="CONF_MESSAGE[Authenticated Update Site]" type="password" label="CONF_MESSAGE[Update Site Password]" description="CONF_MESSAGE[Required if the update site is requiring credentials.]" default="" mandatory="false"/>
+        <global_param name="PROXY_HOST" group="CONF_MESSAGE[Proxy configuration]" type="string" label="CONF_MESSAGE[Proxy Host]" description="CONF_MESSAGE[Use a predefined proxy to establish connexion]" default="" mandatory="false"/>
+        <global_param name="PROXY_USER" group="CONF_MESSAGE[Proxy configuration]" type="string" label="CONF_MESSAGE[Proxy User]" description="CONF_MESSAGE[Predefined proxy user name]" default="" mandatory="false"/>
+        <global_param name="PROXY_PASS" group="CONF_MESSAGE[Proxy configuration]" type="password" label="CONF_MESSAGE[Proxy Pass]" description="CONF_MESSAGE[Predefined proxy password]" default="" mandatory="false"/>
+    </server_settings>
+	<client_settings icon="plugins/access.ajxp_conf/admin.png">
+		<resources>
+			<i18n namespace="updater" path="plugins/action.updater/i18n" />
+		</resources>
+	</client_settings>
+	<registry_contributions>
+        <actions>
+            <action name="get_upgrade_path">
+                <processing>
+                    <serverCallback methodName="switchAction" restParams="/" developerComment="Check if there are packages available for upgrade.">
+                        <output type="JSON" description="A list of packages that can be applied sequentially to move from current to latest version, plus latest version HTML release note."/>
+                    </serverCallback>
+                </processing>
+            </action>
+            <action name="display_upgrade_note">
+                <processing>
+                    <serverCallback methodName="switchAction" restParams="/" developerComment="Display upgrade note"/>
+                </processing>
+            </action>
+            <action name="perform_upgrade">
+                <gui text="updater.1" title="updater.2" iconClass="icon-lightbulb" src="download_manager.png" hasAccessKey="false">
+                    <context selection="false" dir="false" recycle="hidden"  behaviour="hidden"
+                        actionBar="true" contextMenu="false" infoPanel="false"
+                        actionBarGroup="admin" inZip="false">
+                    </context>
+                </gui>
+                <processing>
+                    <serverCallback methodName="switchAction" restParams="/" developerComment="Apply the update following available upgrade path."/>
+                </processing>
+            </action>
+            <action name="test_upgrade_scripts">
+                <processing>
+                    <serverCallback methodName="switchAction"/>
+                </processing>
+            </action>
+        </actions>
+	</registry_contributions>
+	<class_definition filename="plugins/action.updater/UpdateController.php" classname="Pydio\Action\Update\UpdateController"/>
+    <dependencies>
+        <!-- Image proxy must be implemented -->
+        <activePlugin pluginName="access.ajxp_conf|access.ajxp_admin"/>
+    </dependencies>
+</ajxp_plugin>

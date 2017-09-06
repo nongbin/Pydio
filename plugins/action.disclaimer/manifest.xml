@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ajxp_plugin id="action.disclaimer" enabled="false" label="CONF_MESSAGE[Disclaimer]" description="CONF_MESSAGE[Display a disclaimer and force acceptation by user]"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd">
+    <plugin_info>
+        <plugin_author>Charles du Jeu</plugin_author>
+        <core_relation packaged="true" tested_version="follow_core"/>
+    </plugin_info>
+    <client_settings>
+        <resources>
+            <i18n namespace="disclaimer" path="plugins/action.disclaimer/i18n" />
+            <js className="DisclaimerActions" file="plugins/action.disclaimer/res/build/DisclaimerActions.js"/>
+        </resources>
+    </client_settings>
+    <server_settings>
+        <param name="DISCLAIMER_ACCEPTED" type="select" group="CONF_MESSAGE[Disclaimer]" choices="yes|CONF_MESSAGE[Accepted],no|CONF_MESSAGE[Not Accepted]" label="CONF_MESSAGE[Validation]"
+              scope="user,group,role"
+              description="CONF_MESSAGE[Whether the user has accepted the disclaimer or not]" default="no"/>
+            <global_param name="DISCLAIMER_ENABLE_SHARED" type="boolean" label="CONF_MESSAGE[Enable for public links]"
+                      description="CONF_MESSAGE[Enable disclaimer for public links. if enabled, it will require disclaimer validation on each public link load, even if a user already accessed the link.]" default="false"/>
+        <global_param name="DISCLAIMER_CONTENT" type="textarea" label="CONF_MESSAGE[Disclaimer Content]"
+               description="CONF_MESSAGE[You can use HTML]" default=""/>
+    </server_settings>
+    <registry_contributions>
+        <actions>
+            <action name="validate_disclaimer">
+                <gui text="disclaimer.1" title="disclaimer.2" iconClass="icon-legal" hasAccessKey="false">
+                    <context selection="false" dir="" recycle="hidden" actionBar="false"
+                             ajxpWidgets="UserWidget" actionBarGroup="utils"/>
+                </gui>
+                <rightsContext adminOnly="false" noUser="true" read="false" userLogged="only" write="false"/>
+                <processing>
+                    <clientCallback module="DisclaimerActions.Callbacks.validate"/>
+                    <serverCallback methodName="toggleDisclaimer" restParams="/validate" developerComment="Set disclaimer in accepted state or not">
+                        <input_param name="validate" type="boolean" description="Accept disclaimer or not"/>
+                    </serverCallback>
+                </processing>
+            </action>
+            <action name="load_disclaimer">
+                <processing>
+                    <serverCallback methodName="loadDisclaimer" restParams="/" developerComment="Return HTML content of the disclaimer">
+                        <output type="HTML" description="Content of the disclaimer"/>
+                    </serverCallback>
+                </processing>
+            </action>
+        </actions>
+        <hooks>
+            <serverCallback methodName="updateSharedUser" hookName="user.after_create"/>
+            <serverCallback methodName="updateSharedUserLogin" hookName="user.after_login"/>
+        </hooks>
+    </registry_contributions>
+    <class_definition filename="plugins/action.disclaimer/DisclaimerProvider.php" classname="Pydio\Action\Disclaimer\DisclaimerProvider"/>
+</ajxp_plugin>

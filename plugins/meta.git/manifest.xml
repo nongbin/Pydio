@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ajxp_plugin id="meta.git" label="CONF_MESSAGE[Git-based Versioning]" description="CONF_MESSAGE[Keep tracks of all files modifications using a local Git repository]" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd">
+    <plugin_info>
+        <core_relation packaged="true" tested_version="7.0"/>
+        <plugin_author>Charles du Jeu</plugin_author>
+    </plugin_info>
+    <class_definition classname="Pydio\Access\Meta\Version\GitManager" filename="plugins/meta.git/vendor/autoload.php"/>
+    <client_settings>
+        <resources>
+            <i18n namespace="meta.git" path="plugins/meta.git/i18n"/>
+            <js className="PydioVersioning" file="plugins/meta.git/res/build/PydioVersioning.js"/>
+            <img_library alias="history_images" path="plugins/meta.git/images"/>
+        </resources>
+    </client_settings>
+    <registry_contributions>
+        <actions>
+            <action name="git_history">
+                <gui text="meta.git.1" title="meta.git.2" iconClass="icon-undo" hasAccessKey="false" weight="20">
+                    <context selection="true" dir="false" recycle="false" behaviour="hidden"
+                        actionBar="true" contextMenu="true" infoPanel="false"
+                        actionBarGroup="0_get">
+                    </context>
+                    <selectionContext dir="false" file="true" recycle="true" unique="true" behaviour="hidden"/></gui>
+                <rightsContext noUser="true" userLogged="only" read="true" write="true" adminOnly=""/>
+                <processing>
+                    <clientCallback module="PydioVersioning.loadHistoryBrowser"/>
+                    <serverCallback methodName="applyActions" restParams="/file+" developerComment="Load the GIT history of this file">
+                        <input_param name="file" type="path" description="Path to the file"/>
+                        <output type="XML" description="XML list of all events that happened on the file"/>
+                    </serverCallback>
+                </processing>
+            </action>
+            <action name="git_getfile" skipSecureToken="true">
+                <processing>
+                    <serverCallback methodName="applyActions" restParams="/file+" developerComment="Download a given version of the file">
+                        <input_param name="file" type="path" description="Path to the file"/>
+                        <input_param name="original_file" type="path" description="Path to the original file if it was renamed in between"/>
+                        <input_param name="commit_id" type="string" description="The git commit string corresponding to the desired state"/>
+                        <input_param name="attach" type="string" description="inline (try to send a correct mime type for edition) or download (send as octet-stream)"/>
+                    </serverCallback>
+                </processing>
+            </action>
+            <action name="git_revertfile" skipSecureToken="true">
+                <processing>
+                    <serverCallback methodName="applyActions" restParams="/file+" developerComment="Revert a file to a given version in GIT">
+                        <input_param name="file" type="path" description="Path to the file"/>
+                        <input_param name="original_file" type="path" description="Path to the original file if it was renamed in between"/>
+                        <input_param name="commit_id" type="string" description="The git commit string corresponding to the desired state"/>
+                    </serverCallback>
+                </processing>
+            </action>
+        </actions>
+        <hooks>
+            <serverCallback hookName="node.change" methodName="changesHook" defer="true" />
+            <serverCallback hookName="version.commit" methodName="changesHook" defer="true" />
+        </hooks>
+    </registry_contributions>
+</ajxp_plugin>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ajxp_plugin enabled="false" id="action.cart" label="CONF_MESSAGE[Selection Cart]" description="CONF_MESSAGE[Select files to a cart and download/share all at once]" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd">
+
+    <plugin_info>
+        <core_relation packaged="true" tested_version="follow_core"/>
+        <plugin_author>Charles du Jeu</plugin_author>
+    </plugin_info>
+
+    <client_settings>
+        <resources>
+            <js className="PydioCart" file="plugins/action.cart/res/build/PydioCart.js"/>
+            <i18n namespace="action.cart" path="plugins/action.cart/i18n"/>
+        </resources>
+    </client_settings>
+
+    <dependencies>
+        <activePlugin pluginName="access.AJXP_STREAM_PROVIDER"/>
+    </dependencies>
+
+    <registry_contributions>
+        <client_configs>
+            <template element="body" name="cart-panel" position="bottom" namespace="PydioCart" component="CartMounter"/>
+        </client_configs>
+        <actions>
+            <action name="create-cart-from-search">
+                <gui src="" iconClass="icon-save" text="action.cart.5" title="action.cart.6">
+                    <context dir="true" recycle="true" selection="false" actionBar="true" actionBarGroup="ajxp-search-result-bar"/>
+                </gui>
+                <processing>
+                    <clientCallback><![CDATA[
+                        var tabulator = $('cart-manager-header').ajxpPaneObject;
+                        var searchEngine;
+                        try{
+                            searchEngine = $$('[ajxpClass="SearchEngine"]')[0].ajxpPaneObject;
+                        }catch(e){};
+                        if(searchEngine){
+                            var value = searchEngine.crtText;
+                            var newLabel = "Search "+value;
+                            newLabel = window.prompt('This will save this search in your Carts. Change the name if you want to:', newLabel);
+                            if(newLabel && tabulator && value){
+                                tabulator.addTab({"id":"new-cart-"+new Date().getTime(),"label":newLabel,"iconClass":"icon-search", closeable:true, dontFocus:false},
+                                {type:"widget", widgetClass:FetchedResultPane, widgetOptions:{label:newLabel,"nodeProviderProperties":searchEngine.buildNodeProviderProperties(),"reloadOnServerMessage":"tree/reload_bookmarks"}});
+                            }
+                        }
+                    ]]></clientCallback>
+                </processing>
+            </action>
+            <action name="send-selection-to-cart">
+                <gui src="" text="action.cart.1" title="action.cart.2" iconClass="mdi mdi-cart-plus">
+                    <context dir="true" recycle="true" selection="true" actionBar="true" contextMenu="true" actionBarGroup="other"/>
+                    <selectionContext dir="true" file="true" recycle="false" unique="false"  evalMetadata="!metadata.get('ajxp_mime') || !metadata.get('ajxp_mime').startsWith('shared_')"/>
+                </gui>
+                <rightsContext adminOnly="false" noUser="false" read="true" userLogged="true" write="false"/>
+                <processing>
+                    <clientCallback module="PydioCart.Callbacks.addCurrentSelection"/>
+                </processing>
+            </action>
+        </actions>
+    </registry_contributions>
+
+    <class_definition classname="Pydio\Action\Cart\CartManager" filename="plugins/action.cart/CartManager.php"/>
+</ajxp_plugin>

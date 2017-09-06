@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ajxp_plugin name="multi" label="CONF_MESSAGE[Multiple Auth Chooser]" enabled="true" description="CONF_MESSAGE[Add a selector on top of the login screen. DO NOT ENABLE MANUALLY, will be activated by auth.multi automatically.]"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd">
+    <plugin_info>
+        <plugin_author>Charles du Jeu</plugin_author>
+    </plugin_info>
+    <server_settings>
+        <global_param name="ORDER" type="integer" label="Order"
+                      description="Order this plugin with other auth frontends" default="200"/>
+    </server_settings>
+    <class_definition classname="Pydio\Auth\Frontend\MultiAuthFrontend" filename="plugins/authfront.multi/MultiAuthFrontend.php"/>
+    <registry_contributions>
+        <actions>
+            <action name="login">
+                <processing>
+                    <clientCallback><![CDATA[
+                        var loginRedirect = AJXP_LOGIN_REDIRECT;
+                        var authSources = AJXP_MULTIAUTH_SOURCES;
+                        var masterAuthSource = 'AJXP_MULTIAUTH_MASTER';
+                        var userIdSeparator = 'AJXP_USER_ID_SEPARATOR';
+                        if(loginRedirect){
+                            document.location.href=loginRedirect;
+                        }else{
+                            ResourcesManager.loadClassesAndApply(["AuthfrontCoreActions"], function(){
+                                AuthfrontCoreActions.Callbacks.loginPassword({
+                                    authSources: authSources,
+                                    masterAuthSource: masterAuthSource,
+                                    userIdSeparator: userIdSeparator
+                                });
+                            });
+                        }
+                    ]]></clientCallback>
+                </processing>
+            </action>
+        </actions>
+        <client_configs>
+            <component_config component="AuthfrontCoreActions.LoginPasswordDialog">
+                <modifier module="AuthfrontCoreActions.MultiAuthModifier"/>
+            </component_config>
+        </client_configs>
+    </registry_contributions>
+    <dependencies>
+        <activePlugin pluginName="auth.multi"/>
+    </dependencies>
+</ajxp_plugin>

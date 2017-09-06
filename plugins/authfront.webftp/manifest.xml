@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ajxp_plugin name="webftp" label="CONF_MESSAGE[Webftp Login Screen]" enabled="false" description="CONF_MESSAGE[DO NOT ENABLE MANUALLY, will be activated by the auth.ftp plugin.]"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd">
+    <plugin_info>
+        <plugin_author>Charles du Jeu</plugin_author>
+    </plugin_info>
+    <server_settings>
+        <global_param name="ORDER" type="integer" label="Order"
+                      description="Order this plugin with other auth frontends" default="210"/>
+    </server_settings>
+    <class_definition classname="Pydio\Auth\Frontend\FTPAuthFrontend" filename="plugins/authfront.webftp/FTPAuthFrontend.php"/>
+    <registry_contributions>
+        <actions>
+            <action name="login">
+                <processing>
+                    <clientCallback><![CDATA[
+						var loginRedirect = AJXP_LOGIN_REDIRECT;
+						if(loginRedirect){
+							document.location.href=loginRedirect;
+						}else{
+                            ResourcesManager.loadClassesAndApply(["AuthfrontCoreActions"], function(){
+                                AuthfrontCoreActions.Callbacks.webFTP();
+                            });
+						}
+						]]></clientCallback>
+                </processing>
+            </action>
+        </actions>
+    </registry_contributions>
+    <dependencies>
+        <activePlugin pluginName="authfront.session_login"/>
+        <activePlugin pluginName="auth.ftp"/>
+    </dependencies>
+</ajxp_plugin>

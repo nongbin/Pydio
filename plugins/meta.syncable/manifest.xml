@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta id="meta.syncable" label="CONF_MESSAGE[Syncable Workspace]" description="CONF_MESSAGE[Track changes on this workspace to enable the synchronization with an external client]" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:noNamespaceSchemaLocation="file:../core.ajaxplorer/ajxp_registry.xsd">
+    <class_definition filename="plugins/meta.syncable/ChangesTracker.php" classname="Pydio\Access\Meta\Sync\ChangesTracker"/>
+    <client_settings>
+        <resources>
+            <i18n namespace="meta.syncable" path="plugins/meta.syncable/i18n"/>
+        </resources>
+    </client_settings>
+    <server_settings>
+        <global_param type="button" name="INSTALL_SQL" choices="run_plugin_action:meta.syncable:installSQLTables" label="CONF_MESSAGE[SQL Tables]" description="CONF_MESSAGE[Install SQL Tables]" mandatory="false"/>
+        <param name="REPO_SYNCABLE" type="boolean" label="CONF_MESSAGE[Syncable Workspace]" description="CONF_MESSAGE[Workspace is syncable]" default="true" scope="repository" expose="true"/>
+        <param name="OBSERVE_STORAGE_CHANGES" type="boolean" label="CONF_MESSAGE[Observe storage changes]" description="CONF_MESSAGE[Continuously monitor underlying storage changes. This is experimental. Can be used if the storage content is modified OUTSIDE of Pydio.]" default="false" expose="false"/>
+        <param name="OBSERVE_STORAGE_EVERY" type="integer" label="CONF_MESSAGE[Observe storage changes every...]" description="CONF_MESSAGE[If previous option is set to Yes, this will trigger a storage indexation every X minutes. This can be heavy in memory, so it can be a good practice to use something between 5 and 60 minutes.]" default="5" expose="false"/>
+    </server_settings>
+    <registry_contributions>
+           <actions>
+               <action name="changes">
+                   <processing>
+                       <serverCallback methodName="switchActions" restParams="/seq_id" developerComment="List all changes on this workspace starting at a given sequence id">
+                           <input_param name="filter" type="path" description="Path to a directory: will return changes as if this dir was the root"/>
+                           <input_param name="flatten" type="boolen" description="Flatten results or not, i.e. send the full sequence of changes, or try to reduce the ones that cancel the others (like move a to b plus move b to c = move a to c)."/>
+                           <input_param name="stream" type="boolean" description="Return json as a stream or as a whole"/>
+                           <output type="JSON" description="Json OR Streamable JSON : json structures that are line separated, giving the ability to parse the answer as a stream by http clients."/>
+                       </serverCallback>
+                   </processing>
+               </action>
+               <action name="resync_storage">
+                   <processing>
+                       <serverCallback methodName="resyncAction" restParams="/" developerComment="Use the current index to compare with underlying storage and detect events"/>
+                   </processing>
+               </action>
+           </actions>
+   		<hooks>
+   			<serverCallback hookName="node.change" methodName="updateNodesIndex" defer="true"/>
+   			<serverCallback hookName="node.index" methodName="indexNode"/>
+   			<serverCallback hookName="node.index.recursive.start" methodName="clearIndexForNode"/>
+   			<serverCallback hookName="node.size.recursive" methodName="computeSizeRecursive"/>
+            <serverCallback hookName="workspace.after_delete" methodName="clearIndexForWorkspaceId"/>
+            <serverCallback hookName="workspace.share_metasources" methodName="setIndexationRequiredFlag"/>
+        </hooks>
+    </registry_contributions>
+</meta>
